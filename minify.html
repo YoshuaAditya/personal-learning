@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body id="page-top">
+  <div>
+    <textarea style="width:90%;height:70vh" id="text" placeholder="Enter code ..."></textarea>
+    <br/><input type="button" value="Minify" onclick="minify()">
+  </div>
+  <script>
+  //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet
+  function minify(){
+    var textarea=document.getElementById('text');
+    var temp=textarea.value;
+    //replace comments with //
+    temp=temp.replace(/\/\/.*?[\r\n]/g, "");
+    //replace newlines and tabs
+    temp=temp.replace(/[\r\n]/g, "");
+    //replace comments with /*?*/
+    temp=temp.replace(/\/\*.*?\*\//g, "");
+    //replace multiple spaces with 1 space
+    temp=temp.replace(/  +/g, " ");
+    //replace space with symbols(ex. })
+    temp=temp.replace(/ (?![a-zA-Z0-9])/g, "");
+    //replace space with symbols(ex.} )
+    temp=temp.replace(/(?<![a-zA-Z0-9'"]) /g, "");
+    textarea.value=temp;
+  }
+  </script>
+</body>
+</html>

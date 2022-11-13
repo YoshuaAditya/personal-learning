@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--<script src="https://unpkg.com/petite-vue" defer init></script> for instant use, below for better security -->
+  <script type="module">
+  import { createApp } from 'https://unpkg.com/petite-vue?module'
+
+  createApp({
+    // exposed to all expressions
+    count: 0,
+    // getters
+    get plusOne() {
+      return this.count + 1
+    },
+    // methods
+    increment() {
+      this.count++
+    }
+  }).mount('#app2')
+</script>
+
+<script type="module">
+import { createApp } from 'https://unpkg.com/petite-vue?module'
+createApp({}).mount('#list')
+</script>
+
+<script type="module">
+const API_URL = `https://api.github.com/repos/vuejs/core/commits?per_page=3&sha=`
+import { createApp } from 'https://unpkg.com/petite-vue?module'
+
+createApp({
+  branches: ['main', 'v2-compat'],
+  currentBranch: 'main',
+  commits: null,
+  async fetchData() {
+      const url = `${API_URL}${this.currentBranch}`
+      this.commits = await (await fetch(url)).json()
+    },
+    truncate(v) {
+      const newline = v.indexOf('\n')
+      return newline > 0 ? v.slice(0, newline) : v
+    },
+    formatDate(v) {
+      return v.replace(/T|Z/g, ' ')
+    }
+}).mount('#fetch')
+</script>
+
+</head>
+
+<body>
+  <div v-scope="{ list: [1,2,3],show:true }" id="list">
+    <button @click="show = !show">Toggle List</button>
+    <button @click="list.push(list.length + 1)">Push Number</button>
+    <button @click="list.pop()">Pop Number</button>
+    <button @click="list.reverse()">Reverse List</button>
+
+    <ul v-if="show && list.length">
+      <li v-for="item of list">{{ item }}</li>
+    </ul>
+    <p v-else-if="list.length">List is not empty, but hidden.</p>
+    <p v-else>List is empty.</p>
+  </div>
+  <!-- v-scope value can be omitted -->
+  <div id="app2">
+    <p>{{ count }}</p>
+    <p>{{ plusOne }}</p>
+    <button @click="increment">increment</button>
+  </div>
+
+  <div id="fetch" @vue:mounted="fetchData()">
+    <h1>Latest Vue Core Commits</h1>
+    <template v-for="branch in branches">
+      <input type="radio"
+      :id="branch"
+      :value="branch"
+      name="branch"
+      v-model="currentBranch"
+      v-effect="console.log(currentBranch)"><!-- watch effect like -->
+      <label :for="branch">{{ branch }}</label>
+    </template>
+    <p>vuejs/vue@{{ currentBranch }}</p>
+    <ul>
+      <li v-for="{ html_url, sha, author, commit } in commits">
+        <a :href="html_url" target="_blank" class="commit">{{ sha.slice(0, 7) }}</a>
+        - <span class="message">{{ truncate(commit.message) }}</span><br>
+        by <span class="author">
+          <a :href="author.html_url" target="_blank">{{ commit.author.name }}</a>
+        </span>
+        at <span class="date">{{ formatDate(commit.author.date) }}</span>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>
